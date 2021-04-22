@@ -1,6 +1,6 @@
 ---
 title: Elder Blog
-layout: default
+layout: home
 ---
 
 Hello
