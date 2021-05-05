@@ -15,29 +15,37 @@ During the design process, many different syntax options were considered and gen
 * A DSL/language-creator syntax which allows for custom syntax and semantics much like Racket 
 * A mostly homoiconic syntax which uses it's data for it's AST like LISP or Rebol
 
-The first options is too constrained. Elder is meant to be used from HTML to system programming and hard coding each construct needed isn't feasible. It also seems unlikely that we can account for all the types of constructs that developers would find useful. For example, imagine adding ObjectCapabilities to a language like Java with compile time feedback.
+The first option is too constrained.
+Elder is meant to be used from HTML to systems programming.
+Prescriptively deciding each syntax construct needed isn't feasible especially as more tools, static analyzers, theorem provers, and others are added.
+Even further, we can't account for all the types of syntax constructs that developers would find useful.
+For example, imagine adding ObjectCapabilities to a language like Java.
+At best, it would be a cludge.
+At worst, a mess of syntax and nonsensical compiler errors.
 
-The second option has the opposite problem; it is too flexible. Learning new syntax, defining lexer/grammar rules, and running code analysis across multiple languages/DSL becomes more difficult. From my limited experience, Racket has tools to assist with much of these however there is still often a disconnect between the AST that's used and the syntax of the language effectively making multiple (somtimes conflicting) constructs.
+The second option has the opposite problem; it is too flexible.
+Learning new syntax, defining lexer/grammar rules, and running code analysis across multiple languages and DSLs becomes more difficult.
+From my limited experience, Racket has tools to assist with much of these issues.
+Regardless there is still a disconnect between the AST that is generated and the syntax of the DSL.
 
-Ultimately the third option was chosen as it seems to balance the flexibility of creating DSLs without allowing the burden of entirely new syntax.
-Since we require the AST to also be defined using Elder syntax the barrier to entry is lowered as developers will know the one syntax which is similar throughout.
-This makes it somewhat easier to reason on your task as it's a single set of rules and code patterns for different DSLs, metaprogramming, compile time, and others.
-It also makes it easier to combine multiple tools and techniques together as it's a single set of syntax and code patterns.
+Ultimately the third option was chosen.
+Using a homoiconic syntax allows Elder to unify different aspects of development and provides a solid basis for tools outside of itself.
 
 ## Benefits
 
 This choice has other benefits:
-* Multiple paradigms are handled with a syntax. For example, Elder can be used for declarative, logic, markdown, imperative, and other paradigms.
-* Since the AST is made of the data of the language it make compile time programming, static analysis, and metaprogramming easier to understand as there's only one syntax.
-* DSLs are easier to create the main task is defining semantics to the existing syntax instead of introducing new syntax.
+* Multiple paradigms are handled with a single syntax. For example, Elder can be used for declarative, logic, markdown, imperative, and other paradigms.
+* Since the AST uses the data of the language it makes compile time programming, static analysis, and metaprogramming easier to understand.
+* DSLs are easier to create because the main task is defining semantics and reusing the Elder data syntax.
 * Elders list of reserved symbols and words is very small. Instead, developers are free to define their own often under some function
   * For example, `for` loops have a `it` keyword signifying an item of the iteration
 * In a constrained, hard-coded language it's hard to know when you've added enough keywords, constructs, patterns, etc. and adding more in often becomes a cludge
-  * For example, see how the syntax for generics have been added to Java. They function, but they're certainly not meant to jive w/ the existing syntax and semantics of the language. Now imagine extending the syntax futher to accept additional concepts like ObjectCapabilities or Linear Types. One would have to do some sort of metaprogramming likely paired with annotations and even then it wouldn't be very clear to the user with helpful compiler insight.
-* Writing tools (for verification, code analysis, metaprogramming, codegen, optimizers, etc.) are easier as everything is defined in the existing syntax w/o an extra layers of abstraction for the AST. The AST is aligned with the syntax.
-* Syntax without semantics is allowed which provides a richer way to name, model, and structure code
+  * For example, see how the syntax for generics have been added to Java. They function, but they're certainly not meant to jive with the existing syntax and semantics of the language. Now imagine extending the syntax futher to accept additional concepts like ObjectCapabilities or Linear Types.
+* Writing tools (for verification, code analysis, metaprogramming, codegen, optimizers, etc.) are easier as everything is defined in the existing syntax without an extra layers of abstraction for the AST. The AST is aligned with the syntax.
+* Syntax without semantics is allowed. This can provide a richer way to name, model, and structure code with less visual noise.
   * For example, instead of using a prefix to identify globals (like `_x = 0` or `$y = 1`) you can use pure syntax (like `global/(x, y) = 0, 1`) without computational cost.
 * Developers will be able to express themselves instead of conforming only to the tools provided by the language. As more external libraries, tools, code analysis, etc. are added a simple data-oriented syntax which doesn't rely on keywords or compiler-constrainted structure becomes more useful.
+* Backwards compatibility becomes much less of an issue. Much like Racket the syntax is versioned. Since the syntax it data, it can be easier to migrate and convert between versions.
 
 ## Drawbacks
 
@@ -46,9 +54,11 @@ Like most design decision, it also has drawbacks:
   * PugJS, SASS, SQL are a good examples of mostly well-designed, cohesive, and fit-to-purpose language which maps very well to their domains
   * This becomes more difficult as the domains and use-cases become wider and general purpose. Elder attempts to get 90% of the terseness of most languages while still maintaining a general syntax.
 * Only allowing a single, or few, ways to model a problem can be useful as it removes certain choices the developers must make.
-* Since Elder syntax is defined in terms of it's data, it's often possible to define syntax that isn't meaningful for a domain
-  * To combat this Elder allows domains to specify arbitrary rules that can run at comptime or runtime to constrain the syntax.
-  * Sometimes defining orthogonal concepts to a domain can be useful as well. For example, logging is a cross-cutting concern across domains which must be handled everywhere. If we only allowed the syntax of a domain we could lose out on cross-cutting as domains become more complex. To constrain this, Elder provides tools to isolate syntax to specific domains and functionality (much like `private` in other languages but travels with data across the stack.
+    * Zig and Odin both constrain their syntax and semantics with the goal of providing only what is necessary for writing low-level, general purpose programs. They sacrifice some terseness for the sake of safety.
+* Since Elder syntax is defined in terms of it's data, it's often possible to define syntax that isn't meaningful to a domain.
+  * To combat this Elder allows domains to specify arbitrary rules that can run at comptime or runtime to constrain the syntax (effectively a form of static analysis).
+  * Sometimes defining orthogonal concepts to a domain can be useful as well.
+    * For example, logging is a cross-cutting concern across domains which must be handled everywhere. If we only allowed the syntax of a domain we could lose some richness across domains.
 
 ## Summary
 
